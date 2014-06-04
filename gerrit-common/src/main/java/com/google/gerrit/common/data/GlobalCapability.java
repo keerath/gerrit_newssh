@@ -41,6 +41,9 @@ public class GlobalCapability {
   /** Can create any project on the server. */
   public static final String CREATE_PROJECT = "createProject";
 
+  /** Can list all commits of a project pertaining to an author */
+  public static final String AUTH_COMMITS = "authorCommits";
+
   /**
    * Denotes who may email change reviewers and watchers.
    * <p>
@@ -85,6 +88,7 @@ public class GlobalCapability {
     NAMES_ALL.add(CREATE_ACCOUNT);
     NAMES_ALL.add(CREATE_GROUP);
     NAMES_ALL.add(CREATE_PROJECT);
+    NAMES_ALL.add(AUTH_COMMITS);
     NAMES_ALL.add(EMAIL_REVIEWERS);
     NAMES_ALL.add(FLUSH_CACHES);
     NAMES_ALL.add(KILL_TASK);
