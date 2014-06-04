@@ -65,8 +65,9 @@ public class CapabilityControl {
   /** @return true if the user can administer this server. */
   public boolean canAdministrateServer() {
     if (canAdministrateServer == null) {
-      canAdministrateServer = user instanceof PeerDaemonUser
-          || matchAny(capabilities.administrateServer, ALLOWED_RULE);
+      canAdministrateServer =
+          user instanceof PeerDaemonUser
+              || matchAny(capabilities.administrateServer, ALLOWED_RULE);
     }
     return canAdministrateServer;
   }
@@ -74,19 +75,22 @@ public class CapabilityControl {
   /** @return true if the user can create an account for another user. */
   public boolean canCreateAccount() {
     return canPerform(GlobalCapability.CREATE_ACCOUNT)
-      || canAdministrateServer();
+        || canAdministrateServer();
   }
 
   /** @return true if the user can create a group. */
   public boolean canCreateGroup() {
-    return canPerform(GlobalCapability.CREATE_GROUP)
-      || canAdministrateServer();
+    return canPerform(GlobalCapability.CREATE_GROUP) || canAdministrateServer();
   }
 
   /** @return true if the user can create a project. */
   public boolean canCreateProject() {
     return canPerform(GlobalCapability.CREATE_PROJECT)
-      || canAdministrateServer();
+        || canAdministrateServer();
+  }
+
+  public boolean canListAuthorCommits(){
+    return canPerform(GlobalCapability.AUTH_COMMITS) ||canAdministrateServer();
   }
 
   /** @return true if the user can email reviewers. */
@@ -94,7 +98,8 @@ public class CapabilityControl {
     if (canEmailReviewers == null) {
       canEmailReviewers =
           matchAny(capabilities.emailReviewers, ALLOWED_RULE)
-          || !matchAny(capabilities.emailReviewers, Predicates.not(ALLOWED_RULE));
+              || !matchAny(capabilities.emailReviewers,
+                  Predicates.not(ALLOWED_RULE));
 
     }
     return canEmailReviewers;
@@ -102,20 +107,17 @@ public class CapabilityControl {
 
   /** @return true if the user can kill any running task. */
   public boolean canKillTask() {
-    return canPerform(GlobalCapability.KILL_TASK)
-      || canAdministrateServer();
+    return canPerform(GlobalCapability.KILL_TASK) || canAdministrateServer();
   }
 
   /** @return true if the user can view the server caches. */
   public boolean canViewCaches() {
-    return canPerform(GlobalCapability.VIEW_CACHES)
-      || canAdministrateServer();
+    return canPerform(GlobalCapability.VIEW_CACHES) || canAdministrateServer();
   }
 
   /** @return true if the user can flush the server's caches. */
   public boolean canFlushCaches() {
-    return canPerform(GlobalCapability.FLUSH_CACHES)
-      || canAdministrateServer();
+    return canPerform(GlobalCapability.FLUSH_CACHES) || canAdministrateServer();
   }
 
   /** @return true if the user can view open connections. */
@@ -126,11 +128,13 @@ public class CapabilityControl {
 
   /** @return true if the user can view the entire queue. */
   public boolean canViewQueue() {
-    return canPerform(GlobalCapability.VIEW_QUEUE)
-      || canAdministrateServer();
+    return canPerform(GlobalCapability.VIEW_QUEUE) || canAdministrateServer();
   }
 
-  /** @return true if the user can force replication to any configured destination. */
+  /**
+   * @return true if the user can force replication to any configured
+   *         destination.
+   */
   public boolean canStartReplication() {
     return canPerform(GlobalCapability.START_REPLICATION)
         || canAdministrateServer();
@@ -237,27 +241,28 @@ public class CapabilityControl {
     return mine;
   }
 
-  private static final Predicate<PermissionRule> ALLOWED_RULE = new Predicate<PermissionRule>() {
-    @Override
-    public boolean apply(PermissionRule rule) {
-      return rule.getAction() == Action.ALLOW;
-    }
-  };
+  private static final Predicate<PermissionRule> ALLOWED_RULE =
+      new Predicate<PermissionRule>() {
+        @Override
+        public boolean apply(PermissionRule rule) {
+          return rule.getAction() == Action.ALLOW;
+        }
+      };
 
-  private boolean matchAny(Iterable<PermissionRule> rules, Predicate<PermissionRule> predicate) {
-    Iterable<AccountGroup.UUID> ids = Iterables.transform(
-        Iterables.filter(rules, predicate),
-        new Function<PermissionRule, AccountGroup.UUID>() {
-          @Override
-          public AccountGroup.UUID apply(PermissionRule rule) {
-            return rule.getGroup().getUUID();
-          }
-        });
+  private boolean matchAny(Iterable<PermissionRule> rules,
+      Predicate<PermissionRule> predicate) {
+    Iterable<AccountGroup.UUID> ids =
+        Iterables.transform(Iterables.filter(rules, predicate),
+            new Function<PermissionRule, AccountGroup.UUID>() {
+              @Override
+              public AccountGroup.UUID apply(PermissionRule rule) {
+                return rule.getGroup().getUUID();
+              }
+            });
     return user.getEffectiveGroups().containsAnyOf(ids);
   }
 
-  private static boolean match(GroupMembership groups,
-      PermissionRule rule) {
+  private static boolean match(GroupMembership groups, PermissionRule rule) {
     return groups.contains(rule.getGroup().getUUID());
   }
 }

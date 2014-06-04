@@ -40,7 +40,7 @@ public final class Project {
     }
 
     @Override
-    protected void set(String newValue) {
+    public void set(String newValue) {
       name = newValue;
     }
 
