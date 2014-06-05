@@ -7,4 +7,4 @@ Command Usage
 
 Arguments 
 1. Project Name
-2. Author Name (regex)
+2. Author Name (pattern)
