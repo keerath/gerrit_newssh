@@ -42,8 +42,7 @@ public class AuthorCommits {
   public void setCommits(Project.NameKey project, String author)
       throws AuthorCommitsFailedException {
     validateparameters(project, author);
-    try
-    {
+    try {
       Repository repo = repoManager.openRepository(project);
       RevWalk walk = new RevWalk(repo);
       walk.markStart(walk.parseCommit(repo.resolve("HEAD")));
@@ -62,6 +61,7 @@ public class AuthorCommits {
     } catch (RepositoryNotFoundException badName) {
       throw new AuthorCommitsFailedException("Cannot list commits of repo "
           + project, badName);
+
     } catch (IOException io) {
       String msg = "Cannot list commits of repo " + project;
       log.error(msg, io);
@@ -81,14 +81,17 @@ public class AuthorCommits {
       stdout =
           new PrintWriter(new BufferedWriter(new OutputStreamWriter(out,
               "UTF-8")));
+
     } catch (UnsupportedEncodingException e) {
       // Our encoding is required by the specifications for the runtime.
       throw new RuntimeException("JVM lacks UTF-8 encoding", e);
     }
+
     stdout.println("");
     if (count == -1) {
       stdout.println("No commits found");
       stdout.flush();
+
     } else {
 
       for (CommitInfo i : logInfo) {
