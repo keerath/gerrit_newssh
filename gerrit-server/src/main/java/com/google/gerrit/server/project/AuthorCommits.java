@@ -31,7 +31,8 @@ public class AuthorCommits {
   private final IdentifiedUser currentUser;
 
   @Inject
-  AuthorCommits(GitRepositoryManager repoManager, IdentifiedUser currentUser) {
+  public AuthorCommits(GitRepositoryManager repoManager,
+      IdentifiedUser currentUser) {
     this.repoManager = repoManager;
     this.currentUser = currentUser;
   }
@@ -39,6 +40,10 @@ public class AuthorCommits {
   private final List<CommitInfo> logInfo = new LinkedList<CommitInfo>();
   private int count = -1;
 
+  public List<CommitInfo> getCommits()
+  {
+    return logInfo;
+  }
   public void setCommits(Project.NameKey project, String author)
       throws AuthorCommitsFailedException {
     validateparameters(project, author);
@@ -108,11 +113,11 @@ public class AuthorCommits {
 
   public void validateparameters(Project.NameKey project, String author)
       throws AuthorCommitsFailedException {
-    if (!currentUser.getCapabilities().canListAuthorCommits())
+    if (!currentUser.getCapabilities().canListAuthorCommits()) {
       throw new AuthorCommitsFailedException(String.format(
           "%s does not have \"Listing an author's commits\" capability.",
           currentUser.getUserName()));
-
+    }
     if (project.get().endsWith(Constants.DOT_GIT_EXT)) {
       project.set(project.get().substring(0,
           project.get().length() - Constants.DOT_GIT_EXT.length()));
@@ -120,7 +125,7 @@ public class AuthorCommits {
   }
 
 
-  private static class CommitInfo {
+  public static class CommitInfo {
     private String id;
     private String auth;
     private String date;
@@ -140,6 +145,31 @@ public class AuthorCommits {
 
     public String getMsg() {
       return msg;
+    }
+
+    public void setId(String id) {
+      this.id = id;
+    }
+
+    public void setAuth(String auth) {
+      this.auth = auth;
+    }
+
+    public void setDate(String date) {
+      this.date = date;
+    }
+
+    public void setMsg(String msg) {
+      this.msg = msg;
+    }
+    public boolean equals(Object commit)
+    {
+      CommitInfo c = (CommitInfo) commit;
+      return getId().equals(c.getId()) && getAuth().equals(c.getAuth()) && getDate().equals(c.getDate()) && getMsg().equals(c.getMsg());
+    }
+    public int hashCode()
+    {
+      return auth.hashCode();
     }
   }
 }

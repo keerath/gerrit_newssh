@@ -70,5 +70,10 @@ limitations under the License.
       <artifactId>gerrit-cache-h2</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

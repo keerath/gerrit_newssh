@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /** Provides {@link Config} annotated with {@link GerritServerConfig}. */
-class GerritServerConfigProvider implements Provider<Config> {
+public class GerritServerConfigProvider implements Provider<Config> {
   private static final Logger log =
       LoggerFactory.getLogger(GerritServerConfigProvider.class);
 
