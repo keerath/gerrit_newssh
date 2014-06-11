@@ -30,7 +30,7 @@ public class AuthorCommitsCommandTest {
   CapabilityControl mockCapability;
 
   @Before
-  public void beforeTest() throws RepositoryNotFoundException, IOException {
+  public void beforeTest() throws IOException {
     mockManager = createMock(GitRepositoryManager.class);
     mockUser = createMock(IdentifiedUser.class);
     mockCapability = createMock(CapabilityControl.class);
@@ -39,9 +39,8 @@ public class AuthorCommitsCommandTest {
 
   /* Test to list commits with valid repository, author and user capability */
   @Test
-  public void testCorrectUsage() throws RepositoryNotFoundException,
+  public void testCorrectUsage() throws
       IOException, AuthorCommitsFailedException {
-
     EasyMock.expect(mockManager.openRepository(new Project.NameKey("trial")))
         .andReturn(
             RepositoryCache.open(FileKey.lenient(new File(
@@ -82,8 +81,7 @@ public class AuthorCommitsCommandTest {
   /* Test to list commits of a repository with a .git extension */
   @Test
   public void testProjectNameWithGitExtension()
-      throws AuthorCommitsFailedException, IOException,
-      RepositoryNotFoundException {
+      throws AuthorCommitsFailedException, IOException{
     EasyMock.expect(mockManager.openRepository(new Project.NameKey("trial")))
         .andReturn(
             RepositoryCache.open(FileKey.lenient(new File(
@@ -108,7 +106,7 @@ public class AuthorCommitsCommandTest {
    */
   @Test(expected = RepositoryNotFoundException.class)
   public void testNonExistingRepository() throws AuthorCommitsFailedException,
-      IOException, RepositoryNotFoundException {
+      IOException{
     EasyMock.expect(mockManager.openRepository(new Project.NameKey("abcdefg")))
         .andReturn(
             RepositoryCache.open(FileKey.lenient(new File(
@@ -118,5 +116,4 @@ public class AuthorCommitsCommandTest {
     replay(mockUser, mockCapability, mockManager);
     cmd_test.setCommits(new Project.NameKey("abcdefg"), "kee");
   }
-
 }

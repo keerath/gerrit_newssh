@@ -23,36 +23,39 @@ import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
 
+/** Class to list commits of an author pertaining to a project. */
 public class AuthorCommits {
-  private static final Logger log = LoggerFactory
+  private static final Logger logAuthorCommits = LoggerFactory
       .getLogger(AuthorCommits.class);
 
   private final GitRepositoryManager repoManager;
   private final IdentifiedUser currentUser;
 
+
   @Inject
-  public AuthorCommits(GitRepositoryManager repoManager,
-      IdentifiedUser currentUser) {
-    this.repoManager = repoManager;
-    this.currentUser = currentUser;
+  public AuthorCommits(final GitRepositoryManager manager,
+      final IdentifiedUser user) {
+    this.repoManager = manager;
+    this.currentUser = user;
   }
 
   private final List<CommitInfo> logInfo = new LinkedList<CommitInfo>();
   private int count = -1;
 
-  public List<CommitInfo> getCommits() {
+  public final List<CommitInfo> getCommits() {
     return logInfo;
   }
 
-  public void setCommits(Project.NameKey project, String author)
-      throws AuthorCommitsFailedException {
+
+  public final void setCommits(final Project.NameKey project,
+      final String author) throws AuthorCommitsFailedException {
     validateparameters(project, author);
     try {
       Repository repo = repoManager.openRepository(project);
       RevWalk walk = new RevWalk(repo);
       walk.markStart(walk.parseCommit(repo.resolve("HEAD")));
-      RevFilter auth_filter = AuthorRevFilter.create(author);
-      walk.setRevFilter(auth_filter);
+      RevFilter authFilter = AuthorRevFilter.create(author);
+      walk.setRevFilter(authFilter);
 
       for (RevCommit commit : walk) {
         CommitInfo info = new CommitInfo();
@@ -69,18 +72,18 @@ public class AuthorCommits {
 
     } catch (IOException io) {
       String msg = "Cannot list commits of repo " + project;
-      log.error(msg, io);
+      logAuthorCommits.error(msg, io);
       throw new AuthorCommitsFailedException(msg, io);
 
     } catch (Exception e) {
       String msg = "Cannot list commits of repo " + project;
-      log.error(msg, e);
+      logAuthorCommits.error(msg, e);
       throw new AuthorCommitsFailedException(msg, e);
     }
 
   }
 
-  public void display(OutputStream out) {
+  public final void display(final OutputStream out) {
     final PrintWriter stdout;
     try {
       stdout =
@@ -111,8 +114,8 @@ public class AuthorCommits {
     }
   }
 
-  public void validateparameters(Project.NameKey project, String author)
-      throws AuthorCommitsFailedException {
+  public final void validateparameters(final Project.NameKey project,
+      final String author) throws AuthorCommitsFailedException {
     if (!currentUser.getCapabilities().canListAuthorCommits()) {
       throw new AuthorCommitsFailedException(String.format(
           "%s does not have \"Listing an author's commits\" capability.",
@@ -134,45 +137,49 @@ public class AuthorCommits {
     private String date;
     private String msg;
 
-    public String getId() {
+    public final String getId() {
       return id;
     }
 
-    public String getAuth() {
+    public final String getAuth() {
       return auth;
     }
 
-    public String getDate() {
+    public final String getDate() {
       return date;
     }
 
-    public String getMsg() {
+    public final String getMsg() {
       return msg;
     }
 
-    public void setId(String id) {
-      this.id = id;
+    public final void setId(final String commitId) {
+      this.id = commitId;
     }
 
-    public void setAuth(String auth) {
-      this.auth = auth;
+    public final void setAuth(final String commitAuth) {
+      this.auth = commitAuth;
     }
 
-    public void setDate(String date) {
-      this.date = date;
+    public final void setDate(final String commitDate) {
+      this.date = commitDate;
     }
 
-    public void setMsg(String msg) {
-      this.msg = msg;
+    public final void setMsg(final String commitMsg) {
+      this.msg = commitMsg;
     }
 
-    public boolean equals(Object commit) {
-      CommitInfo c = (CommitInfo) commit;
-      return getId().equals(c.getId()) && getAuth().equals(c.getAuth())
-          && getDate().equals(c.getDate()) && getMsg().equals(c.getMsg());
+    public final boolean equals(final Object commit) {
+      if (commit != null) {
+        CommitInfo c = (CommitInfo) commit;
+        return getId().equals(c.getId()) && getAuth().equals(c.getAuth())
+            && getDate().equals(c.getDate()) && getMsg().equals(c.getMsg());
+      } else {
+        return false;
+      }
     }
 
-    public int hashCode() {
+    public final int hashCode() {
       return auth.hashCode();
     }
   }

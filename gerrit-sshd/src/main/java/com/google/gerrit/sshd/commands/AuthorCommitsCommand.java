@@ -9,7 +9,7 @@ import org.kohsuke.args4j.Argument;
 import com.google.gerrit.server.project.AuthorCommits;
 import com.google.inject.Inject;
 
-/** List all commits in a project pertaining to an author **/
+/** List all commits in a project pertaining to an author. **/
 @RequiresCapability(GlobalCapability.AUTH_COMMITS)
 public class AuthorCommitsCommand extends SshCommand {
   @Argument(index = 0, required = true, metaVar = "PROJECT", usage = "name of the project")
@@ -20,15 +20,14 @@ public class AuthorCommitsCommand extends SshCommand {
 
   @Inject
   private AuthorCommits impl;
+
   @Override
-  protected void run() throws Exception{
-    try{
-    impl.setCommits(new Project.NameKey(projName.trim()),authorName);
-    impl.display(out);
-  }
-    catch(AuthorCommitsFailedException err)
-    {
-      throw new UnloggedFailure(1,"fatal: " + err.getMessage(),err);
+  protected final void run() throws Exception {
+    try {
+      impl.setCommits(new Project.NameKey(projName.trim()), authorName);
+      impl.display(out);
+    } catch (AuthorCommitsFailedException err) {
+      throw new UnloggedFailure(1, "fatal: " + err.getMessage(), err);
     }
-}
+  }
 }
