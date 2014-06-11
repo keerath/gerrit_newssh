@@ -28,21 +28,27 @@ public class AuthorCommitsCommandTest {
   GitRepositoryManager mockManager;
   IdentifiedUser mockUser;
   CapabilityControl mockCapability;
-  @Before
-  public void beforeTest() throws RepositoryNotFoundException, IOException
-  {
-   mockManager = createMock(GitRepositoryManager.class);
-   mockUser = createMock(IdentifiedUser.class);
-   mockCapability = createMock(CapabilityControl.class);
 
+  @Before
+  public void beforeTest() throws RepositoryNotFoundException, IOException {
+    mockManager = createMock(GitRepositoryManager.class);
+    mockUser = createMock(IdentifiedUser.class);
+    mockCapability = createMock(CapabilityControl.class);
+    cmd_test = new AuthorCommits(mockManager, mockUser);
   }
+
+  /* Test to list commits with valid repository, author and user capability */
   @Test
-  public void testRun() throws RepositoryNotFoundException, IOException, AuthorCommitsFailedException{
-    cmd_test = new AuthorCommits(mockManager,mockUser);
-    EasyMock.expect(mockManager.openRepository(new Project.NameKey("trial"))).andReturn(RepositoryCache.open(FileKey.lenient(new File("../../review_site/git","trial.git"), FS.DETECTED)));
+  public void testCorrectUsage() throws RepositoryNotFoundException,
+      IOException, AuthorCommitsFailedException {
+
+    EasyMock.expect(mockManager.openRepository(new Project.NameKey("trial")))
+        .andReturn(
+            RepositoryCache.open(FileKey.lenient(new File(
+                "../../review_site/git", "trial.git"), FS.DETECTED)));
     EasyMock.expect(mockUser.getCapabilities()).andReturn(mockCapability);
     EasyMock.expect(mockCapability.canListAuthorCommits()).andReturn(true);
-    replay(mockUser,mockCapability,mockManager);
+    replay(mockUser, mockCapability, mockManager);
     List<CommitInfo> expected = new LinkedList<CommitInfo>();
     CommitInfo ex = new CommitInfo();
     ex.setId("ede945e22cba9203ce8a0aae1409e50d36b3db72");
@@ -50,7 +56,67 @@ public class AuthorCommitsCommandTest {
     ex.setMsg("init commit\n");
     ex.setDate("Tue Jun 03 10:32:59 IST 2014");
     expected.add(ex);
-    cmd_test.setCommits(new Project.NameKey("trial"),"kee");
-    assertEquals(expected,cmd_test.getCommits());
+    cmd_test.setCommits(new Project.NameKey("trial"), "kee");
+    assertEquals(expected, cmd_test.getCommits());
   }
+
+  /* Test to check if exception is thrown without proper user capability */
+  @Test(expected = AuthorCommitsFailedException.class)
+  public void testUserWithoutCapability() throws AuthorCommitsFailedException {
+    EasyMock.expect(mockUser.getCapabilities()).andReturn(mockCapability);
+    EasyMock.expect(mockCapability.canListAuthorCommits()).andReturn(false);
+    EasyMock.expect(mockUser.getUserName()).andReturn("keerath");
+    replay(mockUser, mockCapability);
+    cmd_test.setCommits(new Project.NameKey("trial"), "kee");
+  }
+
+  /* Test to check if exception is thrown with improper author pattern */
+  @Test(expected = AuthorCommitsFailedException.class)
+  public void testIncorrectAuthorPattern() throws AuthorCommitsFailedException {
+    EasyMock.expect(mockUser.getCapabilities()).andReturn(mockCapability);
+    EasyMock.expect(mockCapability.canListAuthorCommits()).andReturn(true);
+    replay(mockUser, mockCapability);
+    cmd_test.setCommits(new Project.NameKey("trial"), "ke*");
+  }
+
+  /* Test to list commits of a repository with a .git extension */
+  @Test
+  public void testProjectNameWithGitExtension()
+      throws AuthorCommitsFailedException, IOException,
+      RepositoryNotFoundException {
+    EasyMock.expect(mockManager.openRepository(new Project.NameKey("trial")))
+        .andReturn(
+            RepositoryCache.open(FileKey.lenient(new File(
+                "../../review_site/git", "trial.git"), FS.DETECTED)));
+    EasyMock.expect(mockUser.getCapabilities()).andReturn(mockCapability);
+    EasyMock.expect(mockCapability.canListAuthorCommits()).andReturn(true);
+    replay(mockUser, mockCapability, mockManager);
+    List<CommitInfo> expected = new LinkedList<CommitInfo>();
+    CommitInfo ex = new CommitInfo();
+    ex.setId("ede945e22cba9203ce8a0aae1409e50d36b3db72");
+    ex.setAuth("Keerath Jaggi <keerath.jaggi@gmail.com> 1401771779 +0530");
+    ex.setMsg("init commit\n");
+    ex.setDate("Tue Jun 03 10:32:59 IST 2014");
+    expected.add(ex);
+    cmd_test.setCommits(new Project.NameKey("trial.git"), "kee");
+    assertEquals(expected, cmd_test.getCommits());
+  }
+
+  /*
+   * Test to check if exception is thrown when a non existing repository is
+   * entered
+   */
+  @Test(expected = RepositoryNotFoundException.class)
+  public void testNonExistingRepository() throws AuthorCommitsFailedException,
+      IOException, RepositoryNotFoundException {
+    EasyMock.expect(mockManager.openRepository(new Project.NameKey("abcdefg")))
+        .andReturn(
+            RepositoryCache.open(FileKey.lenient(new File(
+                "../../review_site/git", "abcdefg.git"), FS.DETECTED)));
+    EasyMock.expect(mockUser.getCapabilities()).andReturn(mockCapability);
+    EasyMock.expect(mockCapability.canListAuthorCommits()).andReturn(true);
+    replay(mockUser, mockCapability, mockManager);
+    cmd_test.setCommits(new Project.NameKey("abcdefg"), "kee");
+  }
+
 }

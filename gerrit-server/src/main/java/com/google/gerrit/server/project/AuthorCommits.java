@@ -40,10 +40,10 @@ public class AuthorCommits {
   private final List<CommitInfo> logInfo = new LinkedList<CommitInfo>();
   private int count = -1;
 
-  public List<CommitInfo> getCommits()
-  {
+  public List<CommitInfo> getCommits() {
     return logInfo;
   }
+
   public void setCommits(Project.NameKey project, String author)
       throws AuthorCommitsFailedException {
     validateparameters(project, author);
@@ -92,13 +92,13 @@ public class AuthorCommits {
       throw new RuntimeException("JVM lacks UTF-8 encoding", e);
     }
 
-    stdout.println("");
+
     if (count == -1) {
-      stdout.println("No commits found");
+      stdout.println("NO COMMITS FOUND");
       stdout.flush();
 
     } else {
-
+      stdout.println("");
       for (CommitInfo i : logInfo) {
 
         stdout.println("commit " + i.getId());
@@ -121,6 +121,9 @@ public class AuthorCommits {
     if (project.get().endsWith(Constants.DOT_GIT_EXT)) {
       project.set(project.get().substring(0,
           project.get().length() - Constants.DOT_GIT_EXT.length()));
+    }
+    if (!author.matches("[a-zA-Z]+")) {
+      throw new AuthorCommitsFailedException("No special characters allowed");
     }
   }
 
@@ -162,13 +165,14 @@ public class AuthorCommits {
     public void setMsg(String msg) {
       this.msg = msg;
     }
-    public boolean equals(Object commit)
-    {
+
+    public boolean equals(Object commit) {
       CommitInfo c = (CommitInfo) commit;
-      return getId().equals(c.getId()) && getAuth().equals(c.getAuth()) && getDate().equals(c.getDate()) && getMsg().equals(c.getMsg());
+      return getId().equals(c.getId()) && getAuth().equals(c.getAuth())
+          && getDate().equals(c.getDate()) && getMsg().equals(c.getMsg());
     }
-    public int hashCode()
-    {
+
+    public int hashCode() {
       return auth.hashCode();
     }
   }
