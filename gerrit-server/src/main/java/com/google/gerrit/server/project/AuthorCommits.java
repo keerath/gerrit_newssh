@@ -25,13 +25,23 @@ import java.util.List;
 
 /** Class to list commits of an author pertaining to a project. */
 public class AuthorCommits {
-  private static final Logger logAuthorCommits = LoggerFactory
+  private static final Logger LOGAUTHORCOMMITS = LoggerFactory
       .getLogger(AuthorCommits.class);
 
   private final GitRepositoryManager repoManager;
   private final IdentifiedUser currentUser;
 
 
+
+  /**
+   * Injecting Dependencies
+   *
+   * @param manager
+   *        manager for managing git repositories
+   *
+   * @param user
+   *        user to identify the current user
+   */
   @Inject
   public AuthorCommits(final GitRepositoryManager manager,
       final IdentifiedUser user) {
@@ -42,14 +52,33 @@ public class AuthorCommits {
   private final List<CommitInfo> logInfo = new LinkedList<CommitInfo>();
   private int count = -1;
 
+
+  /**
+   * Returns the commit log
+   *
+   * @return commit log
+   */
   public final List<CommitInfo> getCommits() {
     return logInfo;
   }
 
 
+  /**
+   * Sets the commit log pertaining to a project and an author
+   *
+   * @param project
+   *        project name key
+   *
+   * @param author
+   *        author name pattern
+   *
+   * @throws AuthorCommitsFailedException
+   *         if repository is not found, user does
+   *         not have capability and author name contains illegal characters
+   */
   public final void setCommits(final Project.NameKey project,
       final String author) throws AuthorCommitsFailedException {
-    validateparameters(project, author);
+    validateParameters(project, author);
     try {
       Repository repo = repoManager.openRepository(project);
       RevWalk walk = new RevWalk(repo);
@@ -59,30 +88,37 @@ public class AuthorCommits {
 
       for (RevCommit commit : walk) {
         CommitInfo info = new CommitInfo();
-        info.id = commit.getId().getName();
-        info.auth = commit.getAuthorIdent().toExternalString();
-        info.date = commit.getAuthorIdent().getWhen().toString();
-        info.msg = commit.getFullMessage();
+        info.setId(commit.getId().getName());
+        info.setAuth(commit.getAuthorIdent().toExternalString());
+        info.setDate(commit.getAuthorIdent().getWhen().toString());
+        info.setMsg(commit.getFullMessage());
         logInfo.add(info);
         count++;
       }
     } catch (RepositoryNotFoundException badName) {
-      throw new AuthorCommitsFailedException("Cannot list commits of repo "
+      throw new AuthorCommitsFailedException("Cannot list commits of repo"
           + project, badName);
 
     } catch (IOException io) {
-      String msg = "Cannot list commits of repo " + project;
-      logAuthorCommits.error(msg, io);
+      String msg = "Cannot list commits of repo" + project;
+      LOGAUTHORCOMMITS.error(msg, io);
       throw new AuthorCommitsFailedException(msg, io);
 
     } catch (Exception e) {
-      String msg = "Cannot list commits of repo " + project;
-      logAuthorCommits.error(msg, e);
+      String msg = "Cannot list commits of repo" + project;
+      LOGAUTHORCOMMITS.error(msg, e);
       throw new AuthorCommitsFailedException(msg, e);
     }
 
   }
 
+
+  /**
+   * Display commits
+   *
+   * @param out
+   *        output stream to display commits
+   */
   public final void display(final OutputStream out) {
     final PrintWriter stdout;
     try {
@@ -102,19 +138,34 @@ public class AuthorCommits {
 
     } else {
       stdout.println("");
-      for (CommitInfo i : logInfo) {
+      for (CommitInfo info : logInfo) {
 
-        stdout.println("commit " + i.getId());
-        stdout.println("Author: " + i.getAuth());
-        stdout.println("Date: " + i.getDate());
+        stdout.println("commit " + info.getId());
+        stdout.println("Author: " + info.getAuth());
+        stdout.println("Date: " + info.getDate());
         stdout.println("");
-        stdout.println("\t" + i.getMsg());
+        stdout.println("\t" + info.getMsg());
       }
       stdout.flush();
     }
   }
 
-  public final void validateparameters(final Project.NameKey project,
+
+  /**
+   * Validates parameters like user capability, project name ending with .git
+   * extension and author pattern
+   *
+   * @param project
+   *        project name key
+   *
+   * @param author
+   *        author name pattern
+   *
+   * @throws AuthorCommitsFailedException
+   *         if user does not have capabilities and
+   *         illegal characters in author pattern
+   */
+  public final void validateParameters(final Project.NameKey project,
       final String author) throws AuthorCommitsFailedException {
     if (!currentUser.getCapabilities().canListAuthorCommits()) {
       throw new AuthorCommitsFailedException(String.format(
@@ -131,44 +182,106 @@ public class AuthorCommits {
   }
 
 
+  /**
+   * CommitInfo bean class
+   *
+   * @author keerathj
+   *
+   */
   public static class CommitInfo {
     private String id;
     private String auth;
     private String date;
     private String msg;
 
+
+    /**
+     * Gets the commit id
+     *
+     * @return commit id
+     */
     public final String getId() {
       return id;
     }
 
+
+    /**
+     * Gets the commit author
+     *
+     * @return commit author
+     */
     public final String getAuth() {
       return auth;
     }
 
+
+    /**
+     * Gets the commit date
+     *
+     * @return commit date
+     */
     public final String getDate() {
       return date;
     }
 
+
+    /**
+     * Gets the commit message
+     *
+     * @return commit message
+     */
     public final String getMsg() {
       return msg;
     }
 
+
+    /**
+     * Sets the commit id
+     *
+     * @param commitId
+     *        commit id
+     */
     public final void setId(final String commitId) {
       this.id = commitId;
     }
 
+
+    /**
+     * Sets the commit author
+     *
+     * @param commitAuth
+     *        commit author
+     */
     public final void setAuth(final String commitAuth) {
       this.auth = commitAuth;
     }
 
+
+    /**
+     * Sets the commit date
+     *
+     * @param commitDate
+     *        commit date
+     */
     public final void setDate(final String commitDate) {
       this.date = commitDate;
     }
 
+    /**
+     * Sets the commit message
+     *
+     * @param commitMsg
+     *        commit message
+     */
     public final void setMsg(final String commitMsg) {
       this.msg = commitMsg;
     }
 
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
     public final boolean equals(final Object commit) {
       if (commit != null) {
         CommitInfo c = (CommitInfo) commit;
@@ -179,6 +292,11 @@ public class AuthorCommits {
       }
     }
 
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
     public final int hashCode() {
       return auth.hashCode();
     }

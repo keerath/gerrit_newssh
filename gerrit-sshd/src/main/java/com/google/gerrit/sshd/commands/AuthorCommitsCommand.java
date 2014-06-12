@@ -10,12 +10,16 @@ import com.google.gerrit.server.project.AuthorCommits;
 import com.google.inject.Inject;
 
 /** List all commits in a project pertaining to an author. **/
+
 @RequiresCapability(GlobalCapability.AUTH_COMMITS)
 public class AuthorCommitsCommand extends SshCommand {
-  @Argument(index = 0, required = true, metaVar = "PROJECT", usage = "name of the project")
+
+  @Argument(index = 0, required = true, metaVar = "PROJECT",
+      usage = "name of the project")
   private String projName;
 
-  @Argument(index = 1, required = true, metaVar = "AUTHOR", usage = "name of the author")
+  @Argument(index = 1, required = true, metaVar = "AUTHOR",
+      usage = "name of the author")
   private String authorName;
 
   @Inject
